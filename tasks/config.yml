@@ -1,0 +1,35 @@
+---
+#Copy the config template
+- name: Copy logstash yml configuration file
+  template: 
+    src: logstash.yml.j2 
+    dest: "{{ logstash_dir }}/logstash.yml"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+    force: yes
+  register: system_change
+  notify: restart logstash
+
+ 
+- name: Create Logstash configuration files.
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{logstash_conf_dir }}/{{ item }}"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+  with_items:
+    - "{{ logstash_conf_files }}"
+  notify: restart logstash
+
+- name: find files in "{{ logstash_conf_dir }}"
+  shell: ls -1 "{{ logstash_conf_dir }}"
+  register: contents
+
+- name: delete all unmanaged files
+  file:
+    path: "{{ logstash_conf_dir }}/{{ item }}"
+    state: absent
+  with_items: "{{ contents.stdout_lines | difference(logstash_conf_files) }}"
+

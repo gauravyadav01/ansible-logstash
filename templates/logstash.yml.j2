@@ -1,0 +1,12 @@
+{% if logstash_yml_config %}
+{{ logstash_yml_config | to_nice_yaml }}
+{% endif -%}
+
+{% if logstash_yml_config['path.data'] is not defined %}
+path.data: /var/lib/logstash
+{% endif -%}
+
+{% if logstash_yml_config['path.logs'] is not defined %}
+path.logs: /var/log/logstash
+{% endif -%}
+
